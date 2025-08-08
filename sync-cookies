@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp ~/solo-level-app-automation/storage.json . && cp ~/solo-level-app-automation/cookies.data .
