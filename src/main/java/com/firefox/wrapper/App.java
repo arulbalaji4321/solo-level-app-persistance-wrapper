@@ -7,6 +7,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class App {
@@ -48,12 +49,14 @@ public class App {
             Scanner scanner = new Scanner(System.in);
             String input = "";
 
-            System.out.println("Type 'save' and press Enter to save data and close browser...");
-
             while (!input.equalsIgnoreCase("save")) {
+                speakPrompt("Please type save and press Enter to save your work before closing the browser.");
                 System.out.print("> ");
-                input = scanner.nextLine();
-                System.out.println("You typed: " + input);
+                input = scanner.nextLine().trim();
+
+                if (!input.equalsIgnoreCase("save")) {
+                    System.out.println("❌ You must save before quitting. Try again.");
+                }
             }
 
             Thread.sleep(500);  // Give browser a moment to finish updates
@@ -69,6 +72,27 @@ public class App {
                 driver.quit();
                 driver = null;
             }
+        }
+    }
+
+    private static void speakPrompt(String message) {
+        System.out.println(message);  // Print the prompt message to console
+        try {
+            ProcessBuilder pb = new ProcessBuilder("./festival-tts", message);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            try (var reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()))) {
+                while (reader.readLine() != null) {
+                    // Consume output silently
+                }
+            }
+
+            process.waitFor();
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println("❌ Failed to run festival-tts:");
+            e.printStackTrace();
         }
     }
 
